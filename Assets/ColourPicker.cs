@@ -7,7 +7,15 @@ public class ColourPicker : MonoBehaviour
 {
     public event Action<Color> OnColourPicked;
 
-    public IEnumerable<KeyValuePair<Color, int>> Colours { get { return colours.Values.Select(c => new KeyValuePair<Color, int>(c.Colour, c.Count)); } }
+    public IEnumerable<KeyValuePair<Color, int>> Colours
+    {
+        get
+        {
+            return colours.Values
+                          .Where(c => c.Count > 0)
+                          .Select(c => new KeyValuePair<Color, int>(c.Colour, c.Count));
+        }
+    }
 
     public ColourEntity ColourEntityPrefab;
     public Transform Content;
@@ -24,9 +32,6 @@ public class ColourPicker : MonoBehaviour
             ent.OnTapped += HandleOnTapped;
             colours.Add(colour, ent);
         }
-
-        // Increase quantity
-        colours[colour].Count += quantity;
     }
 
     public void RemoveColour(Color colour, int quantity = -1)
@@ -35,20 +40,29 @@ public class ColourPicker : MonoBehaviour
             return;
 
         ColourEntity ent = colours[colour];
-        if (quantity < 0 || ent.Count <= quantity)
-        {
-            Destroy(colours[colour].gameObject);
-            colours.Remove(colour);
-        }
+         ent.Count -= quantity;
+    }
 
-        else
-            ent.Count -= quantity;
+    public void RemoveAll(Color colour)
+    {
+        if (!colours.ContainsKey(colour))
+            return;
+
+        ColourEntity ent = colours[colour];
+        ent.Count -= ent.Count;
+    }
+
+    public void RemoveAllColours()
+    {
+        foreach (ColourEntity ent in colours.Values)
+            ent.Count -= ent.Count;
     }
 
     private void HandleOnTapped(object sender, EventArgs e)
     {
         ColourEntity ent = sender as ColourEntity;
         Color colour = ent.Colour;
+        ent.Count++;
 
         if (OnColourPicked != null)
             OnColourPicked(colour);

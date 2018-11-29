@@ -8,8 +8,7 @@ public class ColourMixer : MonoBehaviour
 {
     public Color Colour { get { return ResultantColour.color; } }
 
-    public ColourPicker ColoursToPick;
-    public ColourPicker ColoursPicked;
+    public ColourPicker ColourPicker;
     public Image ResultantColour;
     public Color[] Colours;
 
@@ -18,16 +17,15 @@ public class ColourMixer : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
-        foreach (Color colour in Colours)
-            ColoursToPick.AddColour(colour);
+        foreach (Color colour in Colours.OrderBy(c => c.r).ThenBy(c => c.g).ThenBy(c => c.b))
+            ColourPicker.AddColour(colour);
 
-        ColoursToPick.OnColourPicked += HandleOnUnpickedColourTapped;
-        ColoursPicked.OnColourPicked += HandleOnPickedColourTapped;
+        ColourPicker.OnColourPicked += HandleOnColourPicked;
     }
 
     private Color CombineColours(IEnumerable<KeyValuePair<Color, int>> colourParts)
     {
-        int count = colourParts.Count();
+        int count = colourParts == null ? 0 : colourParts.Count();
         if (count == 0)
             return Color.white;
 
@@ -36,16 +34,15 @@ public class ColourMixer : MonoBehaviour
         return result;
     }
 
-    private void HandleOnUnpickedColourTapped(Color colour)
+    public void Clear()
     {
-        ColoursPicked.AddColour(colour);
-        ResultantColour.color = CombineColours(ColoursPicked.Colours);
+        ColourPicker.RemoveAllColours();
+        ResultantColour.color = CombineColours(null);
     }
 
-    private void HandleOnPickedColourTapped(Color colour)
+    private void HandleOnColourPicked(Color colour)
     {
-        ColoursPicked.RemoveColour(colour, 1);
-        ResultantColour.color = CombineColours(ColoursPicked.Colours);
+        ResultantColour.color = CombineColours(ColourPicker.Colours);
     }
 
     //private ColorCYMK ToCYMK(Color colour)

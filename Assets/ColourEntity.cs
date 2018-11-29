@@ -18,7 +18,17 @@ public class ColourEntity : MonoBehaviour
         set
         {
             count = value;
+
+            // Clamp it!
+            if (count < 0)
+                count = 0;
+
+            // Set text
             countText.text = count.ToString();
+
+            // Hide if 0
+            bool showCount = count > 0;
+            countText.gameObject.SetActive(showCount);
         }
     }
 
@@ -29,8 +39,9 @@ public class ColourEntity : MonoBehaviour
 
     private void Awake()
     {
-        image = GetComponentInChildren<Image>();
+        image = transform.Find("Mask").Find("Colour").GetComponent<Image>();
         countText = GetComponentInChildren<Text>();
+        countText.gameObject.SetActive(false);
     }
 
     public void OnTap()
